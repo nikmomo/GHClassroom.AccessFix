@@ -231,35 +231,14 @@ ngrok http 3000
 # Use the ngrok URL for GitHub webhook configuration
 ```
 
-## Deployment Options
+## Docker Deployment
 
-### Quick Docker Deployment
+### Quick Start with Docker
 
-The fastest way to deploy is using Docker. Choose from multiple cloud platforms:
-
-#### Option 1: Google Cloud Run (Recommended for beginners)
-```bash
-# Build and deploy in one command
-gcloud run deploy ghclassroom-fix \
-  --source . \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars GITHUB_TOKEN=your_token,GITHUB_ORG=your_org,WEBHOOK_SECRET=your_secret
-```
-
-#### Option 2: Railway (One-click deploy)
-1. Fork this repository
-2. Connect to [Railway](https://railway.app)  
-3. Deploy from GitHub
-4. Add environment variables in Railway dashboard
-
-#### Option 3: Manual Docker Deployment
-
-##### Step 1: Prepare Environment
+#### Step 1: Prepare Environment
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/GHClassroom.AccessFix.git
+git clone https://github.com/nikmomo/GHClassroom.AccessFix.git
 cd GHClassroom.AccessFix
 
 # Create production environment file
@@ -274,7 +253,7 @@ LOG_LEVEL=info
 EOF
 ```
 
-##### Step 2: Build Docker Image
+#### Step 2: Build Docker Image
 ```bash
 # Build the image
 docker build -t ghclassroom-fix:latest .
@@ -283,7 +262,7 @@ docker build -t ghclassroom-fix:latest .
 docker images | grep ghclassroom-fix
 ```
 
-##### Step 3: Run Container
+#### Step 3: Run Container
 ```bash
 # Run in production mode
 docker run -d \
@@ -298,38 +277,13 @@ docker ps
 docker logs ghclassroom-fix
 ```
 
-##### Step 4: Test Deployment
+#### Step 4: Test Deployment
 ```bash
 # Test health endpoint
 curl http://localhost:3000/health
 
 # Expected response should show "status": "healthy"
 ```
-
-### Cloud Platform Deployment
-
-#### Google Cloud Platform (Compute Engine)
-```bash
-# Connect to your GCP instance
-gcloud compute ssh your-instance-name
-
-# Run the automated setup script
-wget https://raw.githubusercontent.com/yourusername/GHClassroom.AccessFix/main/setup-docker-debian.sh
-chmod +x setup-docker-debian.sh
-./setup-docker-debian.sh
-```
-
-#### AWS EC2 / DigitalOcean / Linode
-1. **Launch Ubuntu 22.04 server**
-2. **Connect via SSH**
-3. **Run setup script:**
-   ```bash
-   curl -fsSL https://get.docker.com -o get-docker.sh
-   sh get-docker.sh
-   git clone https://github.com/yourusername/GHClassroom.AccessFix.git
-   cd GHClassroom.AccessFix
-   ./setup-docker-debian.sh
-   ```
 
 ### Production Considerations
 
@@ -357,72 +311,6 @@ server {
 }
 ```
 
-#### Systemd Service (Linux Servers)
-For persistent deployment on Linux servers:
-
-```bash
-# Create systemd service
-sudo tee /etc/systemd/system/ghclassroom-fix.service > /dev/null << 'EOF'
-[Unit]
-Description=GitHub Classroom Access Fixer
-After=docker.service
-Requires=docker.service
-
-[Service]
-Type=simple
-Restart=always
-RestartSec=10
-User=root
-ExecStartPre=-/usr/bin/docker stop ghclassroom-fix
-ExecStartPre=-/usr/bin/docker rm ghclassroom-fix
-ExecStart=/usr/bin/docker run \
-  --name ghclassroom-fix \
-  --rm \
-  -p 3000:3000 \
-  --env-file /path/to/.env.production \
-  ghclassroom-fix:latest
-ExecStop=/usr/bin/docker stop ghclassroom-fix
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Enable and start service
-sudo systemctl daemon-reload
-sudo systemctl enable ghclassroom-fix
-sudo systemctl start ghclassroom-fix
-```
-
-#### Docker Compose (Advanced)
-For more complex deployments with monitoring:
-
-```yaml
-version: '3.8'
-
-services:
-  app:
-    build: .
-    container_name: ghclassroom-fix
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env.production
-    
-  nginx:
-    image: nginx:alpine
-    container_name: ghclassroom-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./ssl:/etc/ssl/certs
-    depends_on:
-      - app
-```
-
 #### Monitoring Setup
 ```bash
 # View application logs
@@ -430,9 +318,6 @@ docker logs -f ghclassroom-fix
 
 # Monitor resource usage
 docker stats ghclassroom-fix
-
-# System service logs (if using systemd)
-sudo journalctl -u ghclassroom-fix -f
 ```
 
 ## API Endpoints
