@@ -3,7 +3,7 @@ import { config, validateConfig } from './config';
 import { GitHubWebhookHandler } from './webhooks/github';
 import { GitHubAPIService } from './services/github-api';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
-import { ipWhitelist, corsHeaders, securityHeaders } from './middleware/security';
+import { corsHeaders, securityHeaders } from './middleware/security';
 import { logger } from './utils/logger';
 import type { HealthCheckResponse } from './types';
 
@@ -74,7 +74,7 @@ process_uptime_seconds ${process.uptime()}
   res.send(prometheusFormat);
 });
 
-app.post('/webhook/github', ipWhitelist, (req: Request, res: Response) => {
+app.post('/webhook/github', (req: Request, res: Response) => {
   webhookHandler.handleWebhook(req, res).catch((error) => {
     logger.error({ error }, 'Webhook handler error');
     res.status(500).json({ error: 'Internal server error' });

@@ -26,7 +26,7 @@ GitHub Classroom occasionally experiences issues where students cannot access ne
 
 ## Key Features
 
-- **Automatic Detection**: Monitors GitHub organization webhook events for new repository creation
+- **Webhook-Based Detection**: Monitors GitHub organization webhook events for new repository creation
 - **Bot Invitation Processing**: Automatically detects and replaces invalid `github-classroom[bot]` invitations
 - **Write Access by Default**: Ensures students receive write access to their assignment repositories
 - **Universal Compatibility**: Works with any repository naming pattern - no parsing required
@@ -150,9 +150,10 @@ Your GitHub Personal Access Token must have the following permissions:
 2. **Uncheck** "Pushes" (enabled by default)
 3. **Check** the following events:
    - ✅ **Repositories** (specifically: repository created)
+   - ❌ Do NOT enable other repository events (deleted, publicized, privatized) - only "created" is needed
 4. Ensure "Active" checkbox is checked
 
-**Important**: You only need to monitor "Repository created" events. Do NOT enable "Repository invitations" events - the system handles invitations automatically when repositories are created.
+**Important**: You only need to monitor "Repository created" events. The system automatically processes GitHub Classroom bot invitations when new repositories are created - no additional webhook events are required.
 
 #### Step 5: Test and Save
 1. Click "Add webhook"
@@ -454,16 +455,17 @@ POST /webhook/github
 ```
 Receives and processes GitHub webhook events.
 
-## How It Detects GitHub Classroom Repositories
+## How It Works - Webhook-Based Detection
 
-The system does **not** rely on repository naming patterns. Instead, it:
+The system uses **webhook-based detection** rather than repository naming patterns:
 
-1. **Listens for repository creation events** from your GitHub organization
-2. **Checks for pending invitations** from `github-classroom[bot]` in the newly created repository
-3. **Only processes repositories** that have bot invitations - all other repositories are ignored
-4. **Works with any naming convention** - no configuration needed
+1. **Webhook Trigger**: Listens for `repository.created` webhook events from your GitHub organization
+2. **Bot Invitation Detection**: When a repository is created, checks for pending invitations from `github-classroom[bot]`
+3. **Conditional Processing**: Only processes repositories that have pending GitHub Classroom bot invitations
+4. **Universal Compatibility**: Works with any repository naming convention - no parsing or configuration needed
+5. **Write Access by Default**: Replaces bot invitations with fresh invitations granting write access
 
-This universal approach means the system will work regardless of how your assignments are named or structured.
+This webhook-based approach ensures the system responds immediately when GitHub Classroom creates new repositories, regardless of naming patterns.
 
 ## Monitoring
 
