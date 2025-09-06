@@ -22,17 +22,16 @@ This approach eliminates the need to parse complex repository names - instead, i
 
 ## For Students: What To Do If You Can't Access Your Repository
 
-If you're a student who just accepted a GitHub Classroom assignment but can't access your repository:
+If you're a student who just accepted a GitHub Classroom assignment but showing "GitHub Access Issue":
 
 ### Quick Fix Steps:
 1. **Accept the assignment** through the GitHub Classroom link provided by your instructor
-2. **If you see an access error** (404 or "Repository not found"):
+2. **If you see an access error** ("GitHub Access Issue"):
    - Check your email inbox for a new collaboration invitation
    - The email will be from GitHub with subject like "Invitation to collaborate on [repository-name]"
    - Click the invitation link in the email to gain access
 3. **Success!** You should now have write access to your assignment repository
 
-### What This Looks Like:
 ![GitHub Classroom Access Issue](docs/images/github-classroom-access-error.jpg)
 
 *If you encounter the error shown above, simply check your email for the new invitation that was automatically sent to fix the access issue.*
