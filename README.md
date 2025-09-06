@@ -33,7 +33,7 @@ If you're a student who just accepted a GitHub Classroom assignment but can't ac
 3. **Success!** You should now have write access to your assignment repository
 
 ### What This Looks Like:
-![GitHub Classroom Access Issue](a5bi5h.jpg)
+![GitHub Classroom Access Issue](docs/images/github-classroom-access-error.jpg)
 
 *If you encounter the error shown above, simply check your email for the new invitation that was automatically sent to fix the access issue.*
 
