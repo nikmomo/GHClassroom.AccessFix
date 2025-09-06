@@ -20,6 +20,26 @@ The system addresses a specific GitHub Classroom issue where the `github-classro
 
 This approach eliminates the need to parse complex repository names - instead, it simply finds ALL bot invitations and replaces them with valid ones that students can actually accept.
 
+## For Students: What To Do If You Can't Access Your Repository
+
+If you're a student who just accepted a GitHub Classroom assignment but can't access your repository:
+
+### Quick Fix Steps:
+1. **Accept the assignment** through the GitHub Classroom link provided by your instructor
+2. **If you see an access error** (404 or "Repository not found"):
+   - Check your email inbox for a new collaboration invitation
+   - The email will be from GitHub with subject like "Invitation to collaborate on [repository-name]"
+   - Click the invitation link in the email to gain access
+3. **Success!** You should now have write access to your assignment repository
+
+### What This Looks Like:
+![GitHub Classroom Access Issue](a5bi5h.jpg)
+
+*If you encounter the error shown above, simply check your email for the new invitation that was automatically sent to fix the access issue.*
+
+### Why This Happens:
+Sometimes GitHub Classroom's bot sends invitations that don't work properly. This automated system detects the issue and immediately sends you a new, working invitation from your instructor's account.
+
 ## Problem Statement
 
 GitHub Classroom occasionally experiences issues where students cannot access newly created assignment repositories. The `github-classroom[bot]` may send invitations that students cannot accept or that don't grant proper permissions. This system provides an automated, responsive solution that monitors repository creation events and immediately corrects access permissions by replacing problematic bot invitations.
