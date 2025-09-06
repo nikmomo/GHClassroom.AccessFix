@@ -149,7 +149,7 @@ Your GitHub Personal Access Token must have the following permissions:
 1. Choose "Let me select individual events"
 2. **Uncheck** "Pushes" (enabled by default)
 3. **Check** the following events:
-   - ✅ **Repositories** (specifically: repository created)
+   - ✅ **Repositories** (repository created/deleted, it only process created event)
 4. Ensure "Active" checkbox is checked
 
 **Important**: You only need to monitor "Repository created" events. The system automatically processes GitHub Classroom bot invitations when new repositories are created - no additional webhook events are required.
@@ -411,9 +411,6 @@ Enable debug logging:
 LOG_LEVEL=debug npm run dev
 ```
 
-## Contributing
-
-Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
 
 ## License
 
@@ -422,8 +419,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 - Create an issue for bug reports or feature requests
-- Check [docs/](docs/) for detailed documentation
-- See [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues
 
 ## Acknowledgments
 
