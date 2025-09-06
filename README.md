@@ -62,8 +62,8 @@ GitHub Classroom occasionally experiences issues where students cannot access ne
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/github-classroom-access-fixer.git
-cd github-classroom-access-fixer
+git clone https://github.com/nikmomo/GHClassroom.AccessFix.git
+cd GHClassroom.AccessFix
 ```
 
 2. Install dependencies:
@@ -150,7 +150,6 @@ Your GitHub Personal Access Token must have the following permissions:
 2. **Uncheck** "Pushes" (enabled by default)
 3. **Check** the following events:
    - ✅ **Repositories** (specifically: repository created)
-   - ❌ Do NOT enable other repository events (deleted, publicized, privatized) - only "created" is needed
 4. Ensure "Active" checkbox is checked
 
 **Important**: You only need to monitor "Repository created" events. The system automatically processes GitHub Classroom bot invitations when new repositories are created - no additional webhook events are required.
