@@ -13,12 +13,12 @@ The system addresses a specific GitHub Classroom issue where the `github-classro
 
 **The Solution:**
 1. **Webhook Monitoring**: Listens for repository creation events from your GitHub organization
-2. **Intelligent Detection**: Identifies GitHub Classroom repositories through naming pattern analysis  
-3. **Bot Invitation Cleanup**: Finds any pending invitations sent by `github-classroom[bot]` 
-4. **Re-invitation**: Deletes the bot's invitation and sends a fresh, valid invitation from your authenticated account
-5. **Automatic Permission Assignment**: Ensures students get the correct repository access permissions
+2. **Bot Invitation Detection**: Checks if the newly created repository has any pending invitations from `github-classroom[bot]`
+3. **Bot Invitation Cleanup**: Finds and deletes any pending invitations sent by `github-classroom[bot]` 
+4. **Re-invitation**: Sends fresh, valid invitations from your authenticated account with write access
+5. **Automatic Permission Assignment**: Ensures students get write access to their assignment repositories
 
-This approach eliminates the need to parse complex repository names - instead, it simply finds ALL bot invitations and replaces them with valid ones.
+This approach eliminates the need to parse complex repository names - instead, it simply finds ALL bot invitations and replaces them with valid ones that students can actually accept.
 
 ## Problem Statement
 
@@ -27,9 +27,9 @@ GitHub Classroom occasionally experiences issues where students cannot access ne
 ## Key Features
 
 - **Automatic Detection**: Monitors GitHub organization webhook events for new repository creation
-- **Intelligent Parsing**: Identifies classroom repositories through naming pattern analysis
-- **Permission Management**: Automatically adds students as collaborators with appropriate permissions
-- **Team Support**: Handles both individual and team assignments
+- **Bot Invitation Processing**: Automatically detects and replaces invalid `github-classroom[bot]` invitations
+- **Write Access by Default**: Ensures students receive write access to their assignment repositories
+- **Universal Compatibility**: Works with any repository naming pattern - no parsing required
 - **Enterprise-Ready**: Production-grade security, monitoring, and error handling
 - **High Performance**: Handles 100+ concurrent webhooks with <500ms response time
 - **Comprehensive Monitoring**: Prometheus metrics and health checks included
@@ -44,8 +44,8 @@ GitHub Classroom occasionally experiences issues where students cannot access ne
                                │
                                ▼
                         ┌──────────────────┐
-                        │  Repository      │
-                        │  Parser Service  │
+                        │  Bot Invitation  │
+                        │  Processor       │
                         └──────────────────┘
 ```
 
@@ -149,9 +149,10 @@ Your GitHub Personal Access Token must have the following permissions:
 1. Choose "Let me select individual events"
 2. **Uncheck** "Pushes" (enabled by default)
 3. **Check** the following events:
-   - ✅ **Repositories** (specifically: repository created, deleted, publicized, privatized)
-   - ✅ **Repository invitations** (invitation accepted, created)
+   - ✅ **Repositories** (specifically: repository created)
 4. Ensure "Active" checkbox is checked
+
+**Important**: You only need to monitor "Repository created" events. Do NOT enable "Repository invitations" events - the system handles invitations automatically when repositories are created.
 
 #### Step 5: Test and Save
 1. Click "Add webhook"
@@ -184,10 +185,11 @@ curl -X GET https://your-server.com/health
 1. Student accepts GitHub Classroom assignment
 2. GitHub creates repository and sends webhook to your server
 3. Your server receives `repository.created` event
-4. System identifies it as a classroom repo
-5. Finds and deletes any `github-classroom[bot]` invitations  
-6. Sends fresh invitation from your authenticated account
-7. Student receives working collaboration invitation
+4. System checks repository for pending `github-classroom[bot]` invitations
+5. If bot invitations exist:
+   - Deletes the bot invitations
+   - Sends fresh invitations from your authenticated account with write access
+6. Student receives working collaboration invitations they can actually accept
 
 ## Development
 
@@ -452,19 +454,16 @@ POST /webhook/github
 ```
 Receives and processes GitHub webhook events.
 
-## Repository Naming Patterns
+## How It Detects GitHub Classroom Repositories
 
-The system recognizes the following naming patterns:
+The system does **not** rely on repository naming patterns. Instead, it:
 
-### Individual Assignments
-- `assignment-name-student-username`
-- `assignment-001-username`
-- `lab-exercise-username`
+1. **Listens for repository creation events** from your GitHub organization
+2. **Checks for pending invitations** from `github-classroom[bot]` in the newly created repository
+3. **Only processes repositories** that have bot invitations - all other repositories are ignored
+4. **Works with any naming convention** - no configuration needed
 
-### Team Assignments
-- `assignment-name-team-teamname`
-- `group-assignment-teamname`
-- `team-lab-assignment-name`
+This universal approach means the system will work regardless of how your assignments are named or structured.
 
 ## Monitoring
 
@@ -514,10 +513,10 @@ The `/health` endpoint provides:
    - Check if student username exists on GitHub
    - Review logs for specific error messages
 
-3. **Repository not recognized as classroom repo**
-   - Check repository naming pattern
-   - Verify it's not matching excluded patterns
-   - Enable debug logging for detailed parsing info
+3. **Repository not being processed**
+   - Verify the repository has pending `github-classroom[bot]` invitations
+   - Check webhook delivery logs for "No GitHub Classroom bot invitations found" messages
+   - Enable debug logging to see invitation detection details
 
 ### Debug Mode
 
