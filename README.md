@@ -14,6 +14,8 @@ An enterprise-grade automated system to fix GitHub Classroom repository access i
 - [For Students: Access Troubleshooting](#for-students-access-troubleshooting)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+  - [Local Installation](#local-installation)
+  - [Cloud Installation](#cloud-installation)
 - [Configuration](#configuration)
   - [Environment Variables](#environment-variables)
   - [GitHub Personal Access Token](#github-personal-access-token)
@@ -91,32 +93,108 @@ Sometimes GitHub Classroom's bot sends invitations that don't work properly. Thi
 
 ## Installation
 
-1. Clone the repository:
+### Local Installation
+
+For development and testing on your local machine:
+
+1. **Clone the repository:**
 ```bash
 git clone https://github.com/nikmomo/GHClassroom.AccessFix.git
 cd GHClassroom.AccessFix
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Configure environment variables:
+3. **Configure environment variables:**
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
-4. Build the application:
+4. **Set up ngrok for webhook tunneling:**
+```bash
+# Install ngrok globally
+npm install -g ngrok
+
+# Start ngrok tunnel (in a separate terminal)
+ngrok http 3000
+```
+
+5. **Configure GitHub webhook:**
+   - Use the ngrok HTTPS URL (e.g., `https://abc123.ngrok.io/webhook/github`)
+   - Follow the [GitHub Webhook Setup](#github-webhook-setup) instructions
+
+6. **Run in development mode:**
+```bash
+npm run dev
+```
+
+### Cloud Installation
+
+For production deployment on a cloud server:
+
+1. **Clone the repository on your server:**
+```bash
+git clone https://github.com/nikmomo/GHClassroom.AccessFix.git
+cd GHClassroom.AccessFix
+```
+
+2. **Install dependencies:**
+```bash
+npm install --production
+```
+
+3. **Configure production environment:**
+```bash
+# Create production environment file
+cat > .env.production << 'EOF'
+GITHUB_TOKEN=your_github_token_here
+GITHUB_ORG=your_organization_name
+WEBHOOK_SECRET=your_webhook_secret_here
+PORT=3000
+NODE_ENV=production
+LOG_LEVEL=info
+EOF
+```
+
+4. **Build the application:**
 ```bash
 npm run build
 ```
 
-5. Run the application:
+5. **Option A: Run with Node.js and PM2:**
 ```bash
-npm start
+# Install PM2
+npm install -g pm2
+
+# Start application
+pm2 start dist/index.js --name ghclassroom-fix
+
+# Save PM2 configuration
+pm2 save
+pm2 startup
 ```
+
+6. **Option B: Run with Docker:**
+```bash
+# Build Docker image
+docker build -t ghclassroom-fix:latest .
+
+# Run container
+docker run -d \
+  --name ghclassroom-fix \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  --env-file .env.production \
+  ghclassroom-fix:latest
+```
+
+7. **Configure GitHub webhook:**
+   - Use your server's public URL (e.g., `https://your-server.com/webhook/github`)
+   - Follow the [GitHub Webhook Setup](#github-webhook-setup) instructions
 
 ## Configuration
 
