@@ -32,7 +32,7 @@ If you're a student who just accepted a GitHub Classroom assignment but showing 
    - Click the invitation link in the email to gain access
 3. **Success!** You should now have write access to your assignment repository
 
-![GitHub Classroom Access Issue](docs/images/github-classroom-access-error.jpg)
+![GitHub Classroom Access Issue](docs/images/image.png)
 
 *If you encounter the error shown above, simply check your email for the new invitation that was automatically sent to fix the access issue.*
 
