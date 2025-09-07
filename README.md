@@ -62,7 +62,7 @@ This approach eliminates the need to parse complex repository names - instead, i
 
 ## For Students: Access Troubleshooting
 
-**This section is for the instructor to guide students after this service is deployed.**
+__**This section is for the instructor to guide students after this service is deployed.**__
 
 If you're a student who just accepted a GitHub Classroom assignment but showing "GitHub Repository Access Issue":
 
