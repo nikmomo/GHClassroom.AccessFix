@@ -7,6 +7,36 @@
 
 An enterprise-grade automated system to fix GitHub Classroom repository access issues. This webhook-driven service automatically detects when new classroom repositories are created and ensures students have the correct access permissions by replacing invalid GitHub Classroom bot invitations.
 
+## Table of Contents
+
+- [Problem Statement](#problem-statement)
+- [How It Works](#how-it-works)
+- [For Students: Access Troubleshooting](#for-students-access-troubleshooting)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [Environment Variables](#environment-variables)
+  - [GitHub Personal Access Token](#github-personal-access-token)
+  - [GitHub Webhook Setup](#github-webhook-setup)
+- [Local Development](#local-development)
+  - [Setup with ngrok](#setup-with-ngrok)
+  - [Development Commands](#development-commands)
+- [Deployment](#deployment)
+  - [Docker Deployment](#docker-deployment)
+  - [Production Considerations](#production-considerations)
+- [API Reference](#api-reference)
+- [Architecture](#architecture)
+- [Monitoring & Metrics](#monitoring--metrics)
+- [Security](#security)
+- [Performance](#performance)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+- [Support](#support)
+
+## Problem Statement
+
+GitHub Classroom occasionally experiences issues where students cannot access newly created assignment repositories. The `github-classroom[bot]` may send invitations that students cannot accept or that don't grant proper permissions. This system provides an automated, responsive solution that monitors repository creation events and immediately corrects access permissions by replacing problematic bot invitations.
+
 ## How It Works
 
 The system addresses a specific GitHub Classroom issue where the `github-classroom[bot]` sends invalid or inaccessible collaboration invitations to students. When students accept assignments, they receive invitations that may not work correctly.
@@ -20,7 +50,17 @@ The system addresses a specific GitHub Classroom issue where the `github-classro
 
 This approach eliminates the need to parse complex repository names - instead, it simply finds ALL bot invitations and replaces them with valid ones that students can actually accept.
 
-## For Students: What To Do If You Can't Access Your Repository
+### Key Features
+
+- **Webhook-Based Detection**: Monitors GitHub organization webhook events for new repository creation
+- **Bot Invitation Processing**: Automatically detects and replaces invalid `github-classroom[bot]` invitations
+- **Write Access by Default**: Ensures students receive write access to their assignment repositories
+- **Universal Compatibility**: Works with any repository naming pattern - no parsing required
+- **Enterprise-Ready**: Production-grade security, monitoring, and error handling
+- **High Performance**: Handles 100+ concurrent webhooks with <500ms response time
+- **Comprehensive Monitoring**: Prometheus metrics and health checks included
+
+## For Students: Access Troubleshooting
 
 If you're a student who just accepted a GitHub Classroom assignment but showing "GitHub Access Issue":
 
@@ -39,45 +79,15 @@ If you're a student who just accepted a GitHub Classroom assignment but showing 
 ### Why This Happens:
 Sometimes GitHub Classroom's bot sends invitations that don't work properly. This automated system detects the issue and immediately sends you a new, working invitation from your instructor's account.
 
-## Problem Statement
-
-GitHub Classroom occasionally experiences issues where students cannot access newly created assignment repositories. The `github-classroom[bot]` may send invitations that students cannot accept or that don't grant proper permissions. This system provides an automated, responsive solution that monitors repository creation events and immediately corrects access permissions by replacing problematic bot invitations.
-
-## Key Features
-
-- **Webhook-Based Detection**: Monitors GitHub organization webhook events for new repository creation
-- **Bot Invitation Processing**: Automatically detects and replaces invalid `github-classroom[bot]` invitations
-- **Write Access by Default**: Ensures students receive write access to their assignment repositories
-- **Universal Compatibility**: Works with any repository naming pattern - no parsing required
-- **Enterprise-Ready**: Production-grade security, monitoring, and error handling
-- **High Performance**: Handles 100+ concurrent webhooks with <500ms response time
-- **Comprehensive Monitoring**: Prometheus metrics and health checks included
-
-## Architecture
-
-```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│  GitHub         │────▶│  Webhook Server  │────▶│  GitHub API     │
-│  Organization   │     │  (Express.js)    │     │  (Octokit)      │
-└─────────────────┘     └──────────────────┘     └─────────────────┘
-                               │
-                               ▼
-                        ┌──────────────────┐
-                        │  Bot Invitation  │
-                        │  Processor       │
-                        └──────────────────┘
-```
-
-## Quick Start
-
-### Prerequisites
+## Prerequisites
 
 - Node.js 20.x or higher
 - npm 9.x or higher
 - GitHub Personal Access Token with `repo` and `admin:org` permissions
 - GitHub Organization with webhook access
+- ngrok (for local development and testing)
 
-### Installation
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -122,7 +132,7 @@ npm start
 | `AUTO_ADD_COLLABORATOR` | Automatically add missing collaborators | true | No |
 | `DEFAULT_PERMISSION` | Default permission level | push | No |
 
-### GitHub Personal Access Token Requirements
+### GitHub Personal Access Token
 
 Your GitHub Personal Access Token must have the following permissions:
 
@@ -145,7 +155,7 @@ Your GitHub Personal Access Token must have the following permissions:
 6. **Important**: Copy the token immediately - you won't be able to see it again
 7. Store the token securely in your environment variables
 
-### GitHub Webhook Setup (Step-by-Step)
+### GitHub Webhook Setup
 
 #### Step 1: Access Organization Settings
 1. Navigate to your GitHub Organization (e.g., `https://github.com/VTECE`)
@@ -159,7 +169,7 @@ Your GitHub Personal Access Token must have the following permissions:
 #### Step 3: Configure Webhook Settings
 - **Payload URL**: `https://your-server-domain.com/webhook/github`
   - For local development with ngrok: `https://abc123.ngrok.io/webhook/github`
-  - For cloud deployment: `https://your-app.railway.app/webhook/github`
+  - For cloud deployment: `https://your-app.example.com/webhook/github`
 - **Content type**: Select `application/json`
 - **Secret**: Enter a strong, random string (save this for your `WEBHOOK_SECRET` env var)
   - Generate with: `openssl rand -base64 32`
@@ -210,9 +220,73 @@ curl -X GET https://your-server.com/health
    - Sends fresh invitations from your authenticated account with write access
 6. Student receives working collaboration invitations they can actually accept
 
-## Development
+## Local Development
 
-### Local Development
+### Setup with ngrok
+
+ngrok is essential for local development as it provides a secure tunnel to your local server, allowing GitHub webhooks to reach your development environment.
+
+#### Installing ngrok
+
+**Option 1: Using npm (Recommended)**
+```bash
+npm install -g ngrok
+```
+
+**Option 2: Download from ngrok website**
+1. Visit [ngrok.com](https://ngrok.com/download)
+2. Download the appropriate version for your OS
+3. Extract and add to your PATH
+
+#### Setting up ngrok for Local Testing
+
+1. **Start your local server:**
+```bash
+npm run dev
+# Server will run on http://localhost:3000
+```
+
+2. **In a new terminal, start ngrok:**
+```bash
+ngrok http 3000
+```
+
+3. **ngrok will display a forwarding URL:**
+```
+Forwarding: https://abc123def456.ngrok.io -> http://localhost:3000
+```
+
+4. **Configure GitHub webhook with ngrok URL:**
+   - Use the HTTPS URL from ngrok as your webhook payload URL
+   - Example: `https://abc123def456.ngrok.io/webhook/github`
+
+5. **Update your local `.env` file (optional):**
+```bash
+# If your application needs to know its public URL
+PUBLIC_URL=https://abc123def456.ngrok.io
+```
+
+#### ngrok Tips for Development
+
+- **Free tier limitations**: ngrok free tier generates a new URL each time you restart. Update your webhook configuration accordingly.
+- **Inspect traffic**: Visit `http://localhost:4040` to see all webhook requests and responses
+- **Replay requests**: Use ngrok's web interface to replay failed webhook deliveries for debugging
+- **Custom subdomain**: Consider ngrok paid plans for consistent URLs during development
+
+#### Testing Webhook Locally
+
+1. **Verify ngrok connection:**
+```bash
+curl https://your-ngrok-url.ngrok.io/health
+```
+
+2. **Create a test repository in your organization** to trigger the webhook
+
+3. **Monitor logs in your terminal** to see webhook processing
+
+4. **Check ngrok inspector** at `http://localhost:4040` for request details
+
+### Development Commands
 
 ```bash
 # Run in development mode with hot reload
@@ -234,26 +308,20 @@ npm run format
 npm run typecheck
 ```
 
-### Using ngrok for Local Testing
+### Debug Mode
 
+Enable debug logging for troubleshooting:
 ```bash
-# Install ngrok
-npm install -g ngrok
-
-# Start the server
-npm run dev
-
-# In another terminal, expose your local server
-ngrok http 3000
-
-# Use the ngrok URL for GitHub webhook configuration
+LOG_LEVEL=debug npm run dev
 ```
 
-## Docker Deployment
+## Deployment
 
-### Quick Start with Docker
+### Docker Deployment
 
-#### Step 1: Prepare Environment
+#### Quick Start with Docker
+
+##### Step 1: Prepare Environment
 ```bash
 # Clone the repository
 git clone https://github.com/nikmomo/GHClassroom.AccessFix.git
@@ -271,7 +339,7 @@ LOG_LEVEL=info
 EOF
 ```
 
-#### Step 2: Build Docker Image
+##### Step 2: Build Docker Image
 ```bash
 # Build the image
 docker build -t ghclassroom-fix:latest .
@@ -280,7 +348,7 @@ docker build -t ghclassroom-fix:latest .
 docker images | grep ghclassroom-fix
 ```
 
-#### Step 3: Run Container
+##### Step 3: Run Container
 ```bash
 # Run in production mode
 docker run -d \
@@ -295,7 +363,7 @@ docker ps
 docker logs ghclassroom-fix
 ```
 
-#### Step 4: Test Deployment
+##### Step 4: Test Deployment
 ```bash
 # Test health endpoint
 curl http://localhost:3000/health
@@ -338,7 +406,7 @@ docker logs -f ghclassroom-fix
 docker stats ghclassroom-fix
 ```
 
-## API Endpoints
+## API Reference
 
 ### Health Check
 ```http
@@ -358,7 +426,22 @@ POST /webhook/github
 ```
 Receives and processes GitHub webhook events.
 
-## How It Works - Webhook-Based Detection
+## Architecture
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│  GitHub         │────▶│  Webhook Server  │────▶│  GitHub API     │
+│  Organization   │     │  (Express.js)    │     │  (Octokit)      │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+                               │
+                               ▼
+                        ┌──────────────────┐
+                        │  Bot Invitation  │
+                        │  Processor       │
+                        └──────────────────┘
+```
+
+### Webhook-Based Detection
 
 The system uses **webhook-based detection** rather than repository naming patterns:
 
@@ -370,7 +453,7 @@ The system uses **webhook-based detection** rather than repository naming patter
 
 This webhook-based approach ensures the system responds immediately when GitHub Classroom creates new repositories, regardless of naming patterns.
 
-## Monitoring
+## Monitoring & Metrics
 
 ### Prometheus Metrics
 
@@ -423,13 +506,17 @@ The `/health` endpoint provides:
    - Check webhook delivery logs for "No GitHub Classroom bot invitations found" messages
    - Enable debug logging to see invitation detection details
 
+4. **ngrok connection issues**
+   - Ensure ngrok is running and forwarding to the correct port
+   - Check if the ngrok URL has changed (free tier generates new URLs)
+   - Verify firewall settings allow ngrok connections
+
 ### Debug Mode
 
 Enable debug logging:
 ```bash
 LOG_LEVEL=debug npm run dev
 ```
-
 
 ## License
 
