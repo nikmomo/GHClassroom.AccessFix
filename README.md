@@ -5,7 +5,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-An enterprise-grade automated system to fix GitHub Classroom repository access issues. This webhook-driven service automatically detects when new classroom repositories are created and ensures students have the correct access permissions by replacing invalid GitHub Classroom bot invitations.
+An automated system to fix GitHub Classroom repository access issues. This webhook-driven service automatically detects when new classroom repositories are created and ensures students have the correct access permissions by replacing invalid GitHub Classroom bot invitations.
 
 ## Table of Contents
 
