@@ -39,7 +39,7 @@ Both paths require the same prerequisites:
 
 ### Path A: Local Setup
 
-Use this for development and testing. You'll use [ngrok](https://ngrok.com) to expose your local server to GitHub webhooks.
+Use this for development and testing. You'll use [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) to expose your local server to GitHub webhooks — no account required.
 
 **Step 1: Clone and install**
 
@@ -65,22 +65,24 @@ WEBHOOK_SECRET=any-strong-random-string
 
 Generate a webhook secret with: `openssl rand -base64 32`
 
-**Step 3: Start ngrok**
+**Step 3: Start Cloudflare Tunnel**
 
 ```bash
-# Install ngrok if you haven't
-npm install -g ngrok
+# Install cloudflared: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/
+# macOS: brew install cloudflared
+# Windows: winget install --id Cloudflare.cloudflared
+# Linux: see link above
 
 # In a separate terminal, start the tunnel
-ngrok http 3000
+cloudflared tunnel --url http://localhost:3000
 ```
 
-Copy the HTTPS forwarding URL (e.g., `https://abc123.ngrok.io`).
+Copy the generated URL (e.g., `https://random-words.trycloudflare.com`).
 
 **Step 4: Set up the GitHub webhook**
 
 1. Go to your GitHub Organization > Settings > Webhooks > Add webhook
-2. **Payload URL**: `https://abc123.ngrok.io/webhook/github` (your ngrok URL + `/webhook/github`)
+2. **Payload URL**: `https://random-words.trycloudflare.com/webhook/github` (your tunnel URL + `/webhook/github`)
 3. **Content type**: `application/json`
 4. **Secret**: the same `WEBHOOK_SECRET` from your `.env`
 5. Under "Which events?", select **"Let me select individual events"**
@@ -98,9 +100,7 @@ Test it: `curl http://localhost:3000/health`
 
 You're done! Create a test repository in your org to trigger the webhook.
 
-> **Tip**: Visit `http://localhost:4040` to inspect webhook traffic via the ngrok dashboard.
->
-> **Note**: ngrok free tier generates a new URL on each restart. Update the webhook Payload URL accordingly.
+> **Note**: The free tunnel generates a new URL on each restart. Update the webhook Payload URL accordingly.
 
 ---
 
@@ -265,7 +265,7 @@ server {
 | Webhook signature failing | Verify `WEBHOOK_SECRET` matches exactly (no trailing spaces) |
 | Students not being added | Check token permissions (`repo`, `admin:org`, `read:user`, `user:email`) |
 | Repo not processed | Confirm the repo has pending `github-classroom[bot]` invitations; enable debug logging |
-| ngrok not working | Ensure it's running, check if URL changed (free tier), verify firewall |
+| Tunnel not working | Ensure `cloudflared` is running, check if URL changed (new URL per restart), verify firewall |
 
 ## License
 
